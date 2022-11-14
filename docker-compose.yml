@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+    redis:
+        image: redis:7.0.5-alpine
+        container_name: redis
+        ports:
+          - "6379:6379"
+        volumes:
+            - ./redis:/redis
+
+    api:
+        image: edar_api:latest
+        container_name: api
+        build: ./api
+        restart: always
+        ports:
+            - '9999:5000'
+        volumes:
+            - ./api:/api
+
+    worker:
+        image: edar_api:latest
+        container_name: worker
+        depends_on:
+            - redis
+        command: rq worker --url redis://redis:6379/0
+        links:
+            - redis
+
+    rq-dashboard:
+        image: eoranged/rq-dashboard:latest
+        container_name: rq-dashboard
+        ports:
+            - '9181:9181'
+        links:
+            - redis
+        environment:
+            - RQ_DASHBOARD_REDIS_URL=redis://redis:6379
