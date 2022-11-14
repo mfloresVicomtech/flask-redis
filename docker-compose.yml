@@ -9,7 +9,7 @@ services:
             - ./redis:/redis
 
     api:
-        image: edar_api:latest
+        image: api:latest
         container_name: api
         build: ./api
         restart: always
@@ -19,7 +19,7 @@ services:
             - ./api:/api
 
     worker:
-        image: edar_api:latest
+        image: api:latest
         container_name: worker
         depends_on:
             - redis
