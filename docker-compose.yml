@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 services:
     redis:
         image: redis:7.0.5-alpine
@@ -9,9 +9,11 @@ services:
             - ./redis:/redis
 
     api:
-        image: app-api:latest
-        container_name: api
-        build: ./api
+        image: edar-api
+        container_name: edar-api
+        build:
+            context: ./api
+            dockerfile: Dockerfile
         restart: always
         ports:
             - '9999:5000'
@@ -19,13 +21,14 @@ services:
             - ./api:/api
 
     worker:
-        image: app-api:latest
+        image: edar-api
         container_name: worker
         depends_on:
             - redis
         command: rq worker --url redis://redis:6379/0
         links:
             - redis
+            - api
 
     rq-dashboard:
         image: eoranged/rq-dashboard:latest

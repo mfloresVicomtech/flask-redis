@@ -6,6 +6,7 @@ This is a simple test of Flask and Reddis using Docker Composer. It includes als
 
 1. Create Docker stack
 ```sh
+docker-compose build
 docker-compose -p flask_redis up --build -d
 ```
 
