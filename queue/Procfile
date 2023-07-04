@@ -1,0 +1,2 @@
+redis: redis-server
+api: python3 app.py

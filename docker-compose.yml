@@ -1,44 +1,35 @@
-version: "3.9"
 services:
-  api:
-    image: edar-api
-    container_name: edar-api
+  queue:
+    image: queue
+    # build: ./queue/
     build:
-      context: ./api
-      dockerfile: Dockerfile
-    depends_on:
-      - redis
+      context: ./queue/
+      dockerfile: redis_as_base.dockerfile
     restart: always
     ports:
-      - "9999:5000"
-    volumes:
-      - ./api:/api
-
-  redis:
-    image: redis:7.0.5-alpine
-    container_name: redis
-    restart: always
-    ports:
+      - "5000:5000"
       - "6379:6379"
-    volumes:
-      - ./redis:/redis
-
+  
   worker:
-    image: edar-api
-    container_name: worker
+    image: python:3.10-alpine
     restart: always
     depends_on:
-      - redis
-      - api
-    command: rq worker --url redis://redis:6379/0
-
-  rq-dashboard:
-    image: eoranged/rq-dashboard:latest
-    container_name: rq-dashboard
-    ports:
-      - "9181:9181"
-    depends_on:
-      - redis
-    restart: always
-    environment:
-      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379
+      - queue
+    volumes:
+      - ./worker/:/usr/src/app/:ro
+    working_dir: /usr/src/app/
+    command: sh -c 'pip install rq && rq worker --url redis://queue:6379/0'
+  
+  # redisinsight:
+  #   image: redislabs/redisinsight
+  #   depends_on: [ queue ]
+  #   ports: [ 3000:5000 ]
+  
+  # rq-dashboard:
+  #   image: eoranged/rq-dashboard:latest
+  #   ports:
+  #     - "9181:9181"
+  #   depends_on: [ queue ]
+  #   restart: always
+  #   environment:
+  #     - RQ_DASHBOARD_REDIS_URL=redis://queue:6379
