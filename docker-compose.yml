@@ -1,10 +1,7 @@
 services:
   queue:
     image: queue
-    # build: ./queue/
-    build:
-      context: ./queue/
-      dockerfile: redis_as_base.dockerfile
+    build: ./queue/
     restart: always
     ports:
       - "5000:5000"
@@ -20,16 +17,15 @@ services:
     working_dir: /usr/src/app/
     command: sh -c 'pip install rq && rq worker --url redis://queue:6379/0'
   
-  # redisinsight:
-  #   image: redislabs/redisinsight
-  #   depends_on: [ queue ]
-  #   ports: [ 3000:5000 ]
+  redisinsight:
+    image: redislabs/redisinsight
+    depends_on: [ queue ]
+    ports: [ 3000:5000 ]
   
-  # rq-dashboard:
-  #   image: eoranged/rq-dashboard:latest
-  #   ports:
-  #     - "9181:9181"
-  #   depends_on: [ queue ]
-  #   restart: always
-  #   environment:
-  #     - RQ_DASHBOARD_REDIS_URL=redis://queue:6379
+  rq-dashboard:
+    image: eoranged/rq-dashboard:latest
+    ports: [ 9181:9181 ]
+    depends_on: [ queue ]
+    restart: always
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://queue:6379
